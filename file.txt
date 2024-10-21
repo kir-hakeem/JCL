@@ -1,0 +1,10 @@
+Start-JclStep -StepName JS020 -Pgm 'FTP'
+
+Add-JclDD -LabelName SYSFTPD -Dsn 'HDS.TCPIP.CONFIG(FTPDATA)' -Disp @('NEW','CATLG','DELETE')
+
+Add-JclDD -LabelName SYSPRINT -Sysout '*'
+Add-JclDD -LabelName OUTPUT -Sysout '*'
+
+Add-JclDD -LabelName NETRC -Dsn 'HD42108.NETRC' -Disp @('SHR','KEEP','KEEP')
+
+Add-JclDD -LabelName INPUT -Data @'
