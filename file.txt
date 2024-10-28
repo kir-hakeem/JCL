@@ -1,27 +1,30 @@
-function Copy-Files {
-    param (
-        [string]$indd,  # Source directory or file path
-        [string]$outdd  # Destination directory or file path
-    )
+# Set the base directory from the environment variable
+$runDir = $env:RUN_DIR
+if (-not $runDir) {
+    Write-Output "Environment variable RUN_DIR is not set."
+    return
+}
 
-    # Check if the source exists
-    if (-not (Test-Path -Path $indd)) {
-        Write-Output "Source path '$indd' does not exist."
-        return
-    }
+# Define the source and destination paths
+$batchScripts = Join-Path -Path $runDir -ChildPath "batch-scripts"
+$batchScriptsBackup = Join-Path -Path $runDir -ChildPath "batch-scripts-backup"
 
-    # Create the destination directory if it doesn't exist
-    $destinationPath = Split-Path -Path $outdd
-    if (-not (Test-Path -Path $destinationPath)) {
-        New-Item -ItemType Directory -Path $destinationPath -Force | Out-Null
-    }
+# Check if the source directory exists
+if (-not (Test-Path -Path $batchScripts)) {
+    Write-Output "Source directory '$batchScripts' does not exist."
+    return
+}
 
-    try {
-        # Copy files from source to destination
-        Copy-Item -Path $indd -Destination $outdd -Recurse -Force
-        Write-Output "Files copied successfully from '$indd' to '$outdd'."
-    }
-    catch {
-        Write-Output "An error occurred while copying files: $_"
-    }
+# Ensure the backup directory exists, create it if it does not
+if (-not (Test-Path -Path $batchScriptsBackup)) {
+    New-Item -ItemType Directory -Path $batchScriptsBackup | Out-Null
+}
+
+try {
+    # Copy contents from BATCH-SCRIPTS to BATCH-SCRIPTS-BACKUP with overwrite
+    Copy-Item -Path $batchScripts\* -Destination $batchScriptsBackup -Recurse -Force
+    Write-Output "Contents copied successfully from '$batchScripts' to '$batchScriptsBackup'."
+}
+catch {
+    Write-Output "An error occurred during copying: $_"
 }
