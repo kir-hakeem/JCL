@@ -1,10 +1,27 @@
-Start-JclStep -StepName JS020 -Pgm 'FTP'
+function Copy-Files {
+    param (
+        [string]$indd,  # Source directory or file path
+        [string]$outdd  # Destination directory or file path
+    )
 
-Add-JclDD -LabelName SYSFTPD -Dsn 'HDS.TCPIP.CONFIG(FTPDATA)' -Disp @('NEW','CATLG','DELETE')
+    # Check if the source exists
+    if (-not (Test-Path -Path $indd)) {
+        Write-Output "Source path '$indd' does not exist."
+        return
+    }
 
-Add-JclDD -LabelName SYSPRINT -Sysout '*'
-Add-JclDD -LabelName OUTPUT -Sysout '*'
+    # Create the destination directory if it doesn't exist
+    $destinationPath = Split-Path -Path $outdd
+    if (-not (Test-Path -Path $destinationPath)) {
+        New-Item -ItemType Directory -Path $destinationPath -Force | Out-Null
+    }
 
-Add-JclDD -LabelName NETRC -Dsn 'HD42108.NETRC' -Disp @('SHR','KEEP','KEEP')
-
-Add-JclDD -LabelName INPUT -Data @'
+    try {
+        # Copy files from source to destination
+        Copy-Item -Path $indd -Destination $outdd -Recurse -Force
+        Write-Output "Files copied successfully from '$indd' to '$outdd'."
+    }
+    catch {
+        Write-Output "An error occurred while copying files: $_"
+    }
+}
