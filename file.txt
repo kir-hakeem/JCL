@@ -1,13 +1,9 @@
-# Set the base directory from the environment variable
-$runDir = $env:RUN_DIR
-if (-not $runDir) {
-    Write-Output "Environment variable RUN_DIR is not set."
-    return
-}
+# Set the local environment variable for the Run directory
+$env:RUN_DIR = "E:\ALDOT-Project\run"
 
-# Define the source and destination paths
-$batchScripts = Join-Path -Path $runDir -ChildPath "batch-scripts"
-$batchScriptsBackup = Join-Path -Path $runDir -ChildPath "batch-scripts-backup"
+# Define the source and destination paths based on the RUN_DIR environment variable
+$batchScripts = Join-Path -Path $env:RUN_DIR -ChildPath "batch-scripts"
+$batchScriptsBackup = "."  # Adjust to your server path
 
 # Check if the source directory exists
 if (-not (Test-Path -Path $batchScripts)) {
@@ -15,13 +11,13 @@ if (-not (Test-Path -Path $batchScripts)) {
     return
 }
 
-# Ensure the backup directory exists, create it if it does not
+# Ensure the backup directory on the server exists, create it if it does not
 if (-not (Test-Path -Path $batchScriptsBackup)) {
-    New-Item -ItemType Directory -Path $batchScriptsBackup | Out-Null
+    New-Item -ItemType Directory -Path $batchScriptsBackup -Force | Out-Null
 }
 
+# Copy contents from BATCH-SCRIPTS to BATCH-SCRIPTS-BACKUP with overwrite
 try {
-    # Copy contents from BATCH-SCRIPTS to BATCH-SCRIPTS-BACKUP with overwrite
     Copy-Item -Path $batchScripts\* -Destination $batchScriptsBackup -Recurse -Force
     Write-Output "Contents copied successfully from '$batchScripts' to '$batchScriptsBackup'."
 }
