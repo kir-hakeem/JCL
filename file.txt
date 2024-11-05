@@ -42,12 +42,13 @@ Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
 
 
 
+net group "Group Policy Creator Owners" Administrator /delete
+net group "Enterprise Admins" Administrator /delete
+net group "Domain Admins" Administrator /delete
+net group "Domain Users" Administrator /delete
+net group "Schema Admins" Administrator /delete
+
+
 net localgroup "Access Control Assist" Administrator /delete
-net localgroup "Hyper-V Administrators" Administrator /delete
-net localgroup "Network Configuration Operators" Administrator /delete
-net localgroup "RDS Endpoint Servers" Administrator /delete
-net localgroup "RDS Management Servers" Administrator /delete
-net localgroup "RDS Remote Access Servers" Administrator /delete
 net localgroup "SQLServer2005SQLBrowserUser" Administrator /delete
-net localgroup "Group Policy Creator Owners" Administrator /delete
 
