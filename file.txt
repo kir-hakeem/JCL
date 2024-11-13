@@ -1,18 +1,23 @@
-clusterIssuer:
-  enabled: true
-  name: letsencrypt-prod
-  email: your-email@example.com
-  server: https://acme-v02.api.letsencrypt.org/directory
-  privateKeySecretRef: letsencrypt-prod
-
-certificate:
-  enabled: true
-  name: universal-app-tls
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: datamodels-staging-ingress
   namespace: datamodels-staging
-  secretName: universal-app-tls
-  dnsNames:
-    - datamodels-staging.imsglobal.org
-    - universal-did-resolver.ledtech.org
-  issuerRef:
-    name: letsencrypt-prod
-    kind: ClusterIssuer
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+  - hosts:
+    - datamodels-staging.imsglobal.org  # Replace with your actual domain
+    secretName: datamodels-staging-tls  # The secret created by Cert-Manager
+  rules:
+  - host: datamodels-staging.imsglobal.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: datamodels-staging  # Your service name
+            port:
+              number: 8080  # Make sure this matches your service's target port
