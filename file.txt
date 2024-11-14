@@ -1,23 +1,6 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: datamodels-staging-ingress
-  namespace: datamodels-staging
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-spec:
-  tls:
-  - hosts:
-    - datamodels-staging.imsglobal.org  # Replace with your actual domain
-    secretName: datamodels-staging-tls  # The secret created by Cert-Manager
-  rules:
-  - host: datamodels-staging.imsglobal.org
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: datamodels-staging  # Your service name
-            port:
-              number: 8080  # Make sure this matches your service's target port
+mv plugins/git.jpi plugins/git.jpi.bak
+mv plugins/git-client.jpi plugins/git-client.jpi.bak
+mv plugins/github.jpi plugins/github.jpi.bak
+mv plugins/github-api.jpi plugins/github-api.jpi.bak
+mv plugins/github-branch-source.jpi plugins/github-branch-source.jpi.bak
+mv plugins/workflow-multibranch.jpi plugins/workflow-multibranch.jpi.bak
