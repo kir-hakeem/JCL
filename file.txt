@@ -4,3 +4,7 @@ mv plugins/github.jpi plugins/github.jpi.bak
 mv plugins/github-api.jpi plugins/github-api.jpi.bak
 mv plugins/github-branch-source.jpi plugins/github-branch-source.jpi.bak
 mv plugins/workflow-multibranch.jpi plugins/workflow-multibranch.jpi.bak
+
+
+
+openssl s_client -connect 34.121.98.189:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM > kube-cert.pem
