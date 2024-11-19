@@ -8,3 +8,30 @@ mv plugins/workflow-multibranch.jpi plugins/workflow-multibranch.jpi.bak
 
 
 openssl s_client -connect 34.121.98.189:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM > kube-cert.pem
+
+
+============================================
+
+gcloud compute firewall-rules create allow-jenkins-8080 \
+    --direction=INGRESS \
+    --priority=1000 \
+    --network=default \
+    --action=ALLOW \
+    --rules=tcp:8080 \
+    --source-ranges=0.0.0.0/0 \
+    --description="Allow traffic to Jenkins on port 8080"
+
+
+=====================
+
+gcloud compute instances list --filter="name=jenkins-domains" --format="table[box](NAME,ZONE,EXTERNAL_IP)"
+
+=======================
+
+gcloud compute instances update jenkins-domains \
+    --zone=us-central1-c \
+    --network-interface=network-tier=PREMIUM,access-config
+
+
+============================
+
