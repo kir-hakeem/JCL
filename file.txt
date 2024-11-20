@@ -1,10 +1,11 @@
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: jenkins-token
-  namespace: new-jenkins3
-  annotations:
-    kubernetes.io/service-account.name: jenkins
-type: kubernetes.io/service-account-token
-EOF
+Download the CA Certificate: Kubernetes clusters usually have a CA certificate available in a ConfigMap. Retrieve it using the following command:
+
+kubectl get configmap -n kube-system extension-apiserver-authentication -o jsonpath="{.data['client-ca-file']}" > ca.crt
+
+Verify the CA Certificate: Check the contents of the ca.crt file:
+
+cat ca.crt
+
+Test the Certificate with Curl: Test if the CA certificate can verify the API server:
+
+curl --cacert ca.crt https://34.121.98.189/version
