@@ -35,3 +35,8 @@ Apply the Configuration: Apply both the Role and RoleBinding using:
 
 kubectl apply -f role.yaml
 kubectl apply -f rolebinding.yaml
+
+
+
+kubectl -n new-jenkins3 get secret $(kubectl -n new-jenkins3 get sa jenkins -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode
+
