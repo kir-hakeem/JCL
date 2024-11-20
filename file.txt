@@ -1,59 +1,10 @@
-Create the jenkins Service Account in the new-jenkins3 Namespace: Apply the following YAML to create the service account:
-
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: jenkins
-  namespace: new-jenkins3
-
-Run the command:
-
 kubectl apply -f - <<EOF
 apiVersion: v1
-kind: ServiceAccount
+kind: Secret
 metadata:
-  name: jenkins
+  name: jenkins-token
   namespace: new-jenkins3
+  annotations:
+    kubernetes.io/service-account.name: jenkins
+type: kubernetes.io/service-account-token
 EOF
-
-Verify the Service Account: Check if the service account is created:
-
-    kubectl -n new-jenkins3 get serviceaccount jenkins
-
-Step 3: Bind Roles to the Service Account
-
-    Create Role and RoleBinding: If you haven't already applied the Role and RoleBinding from earlier, do so now:
-
-kubectl apply -f - <<EOF
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: new-jenkins3
-  name: jenkins-role
-rules:
-- apiGroups: [""]
-  resources: ["pods", "pods/log"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: jenkins-rolebinding
-  namespace: new-jenkins3
-subjects:
-- kind: ServiceAccount
-  name: jenkins
-  namespace: new-jenkins3
-roleRef:
-  kind: Role
-  name: jenkins-role
-  apiGroup: rbac.authorization.k8s.io
-EOF
-
-Verify Role Binding: Confirm the binding is in place:
-
-    kubectl -n new-jenkins3 get rolebinding jenkins-rolebinding
-
