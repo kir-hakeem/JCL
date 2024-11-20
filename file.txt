@@ -1,7 +1,30 @@
+Create the jenkins Service Account in the new-jenkins3 Namespace: Apply the following YAML to create the service account:
 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: new-jenkins3
 
-Create a Role with Required Permissions: Use the following YAML to define a Role with permissions to list, watch, and create pods in the new-jenkins3 namespace:
+Run the command:
 
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: new-jenkins3
+EOF
+
+Verify the Service Account: Check if the service account is created:
+
+    kubectl -n new-jenkins3 get serviceaccount jenkins
+
+Step 3: Bind Roles to the Service Account
+
+    Create Role and RoleBinding: If you haven't already applied the Role and RoleBinding from earlier, do so now:
+
+kubectl apply -f - <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -14,9 +37,7 @@ rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["get", "list", "watch"]
-
-Bind the Role to the Jenkins Service Account: Create a RoleBinding to assign the role to the Jenkins service account:
-
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -30,13 +51,9 @@ roleRef:
   kind: Role
   name: jenkins-role
   apiGroup: rbac.authorization.k8s.io
+EOF
 
-Apply the Configuration: Apply both the Role and RoleBinding using:
+Verify Role Binding: Confirm the binding is in place:
 
-kubectl apply -f role.yaml
-kubectl apply -f rolebinding.yaml
-
-
-
-kubectl -n new-jenkins3 get secret $(kubectl -n new-jenkins3 get sa jenkins -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode
+    kubectl -n new-jenkins3 get rolebinding jenkins-rolebinding
 
