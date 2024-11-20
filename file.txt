@@ -1,226 +1,127 @@
-When running Jenkins on a GKE (Google Kubernetes Engine) cluster, you need certain plugins to ensure smooth operation, integration with Kubernetes, and enhanced CI/CD workflows. Below is a categorized list of necessary Jenkins plugins for GKE:
-Core Plugins
+Example Ingress Resource:
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: new-jenkins3
+  annotations:
+    kubernetes.io/ingress.class: "nginx"  # Assuming NGINX Ingress is installed
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # For SSL certificate
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - jenkins.example.com
+      secretName: jenkins-tls-secret  # SSL certificate
+  rules:
+    - host: jenkins.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkinsnew-3
+                port:
+                  number: 8080
+
+3. Set Up SSL Certificates
+
+To configure SSL for your Jenkins setup:
+
+    Install Cert-Manager (if not already installed):
+
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+
+Create a Let's Encrypt ClusterIssuer:
+
+    apiVersion: cert-manager.io/v1
+    kind: ClusterIssuer
+    metadata:
+      name: letsencrypt-prod
+    spec:
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+        email: your-email@example.com
+        privateKeySecretRef:
+          name: letsencrypt-prod
+        solvers:
+          - http01:
+              ingress:
+                class: nginx
+
+    Validate the Certificate:
+        After applying the Ingress configuration, Cert-Manager will generate an SSL certificate and store it in the jenkins-tls-secret.
+
+    Update Your DNS Settings:
+        Point your domain (e.g., jenkins.example.com) to the external IP of the LoadBalancer service (34.45.55.191).
+
+4. Expose External GCP Compute Jenkins Instance
+
+If you also want to route traffic to the GCP Compute Instance (outside the cluster), create an external service using the ExternalName type:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-gcp-instance
+  namespace: new-jenkins3
+spec:
+  type: ExternalName
+  externalName: <external-jenkins-ip>  # Replace with the Jenkins Compute Instance's public IP
+  ports:
+    - protocol: TCP
+      port: 443  # Target HTTPS port
+      targetPort: 443
+
+You can then add another path in your Ingress to route traffic to this external Jenkins instance.
+5. Full Ingress Example (Cluster + GCP Jenkins Instance)
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: new-jenkins3
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - jenkins.example.com
+      secretName: jenkins-tls-secret
+  rules:
+    - host: jenkins.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkinsnew-3
+                port:
+                  number: 8080
+          - path: /external
+            pathType: Prefix
+            backend:
+              service:
+                name: jenkins-gcp-instance
+                port:
+                  number: 443
+
+    / routes traffic to the Kubernetes Jenkins setup.
+    /external routes traffic to the external GCP Jenkins instance.
+
+6. Validate the Setup
+
+    Verify the Ingress status:
+
+    kubectl get ingress -n new-jenkins3
+
+    Access the domain:
+        Test https://jenkins.example.com and ensure SSL is active.
+        For the external instance, test https://jenkins.example.com/external.
 
-These are essential plugins for Jenkins functionality:
-
-    Kubernetes Plugin
-        ID: kubernetes
-        Purpose: Integrates Jenkins with Kubernetes for dynamic agent provisioning.
-        Install Command:
-
-    - kubernetes:3978.vb_4ea_388cf528
-
-Pipeline Plugins
-
-    Workflow API (workflow-api): Core plugin for pipeline execution.
-    Workflow Aggregator (workflow-aggregator): Installs pipeline functionality.
-    Pipeline Stage View (pipeline-stage-view): Displays pipeline execution stages.
-    Install Command:
-
-    - workflow-api:2.47
-    - workflow-aggregator:2.6
-    - pipeline-stage-view:2.19
-
-SSH Credentials Plugin
-
-    ID: ssh-credentials
-    Purpose: Manage SSH credentials for Jenkins.
-    Install Command:
-
-        - ssh-credentials:273.v85f8623c1c5a
-
-Google Cloud Plugins
-
-For seamless integration with Google Cloud services:
-
-    Google Kubernetes Engine Plugin
-        ID: google-kubernetes-engine
-        Purpose: Supports GKE-specific functionality.
-        Install Command:
-
-    - google-kubernetes-engine:0.9.0
-
-Google OAuth Credentials
-
-    ID: google-oauth-plugin
-    Purpose: Authenticate Jenkins to access Google Cloud APIs.
-    Install Command:
-
-    - google-oauth-plugin:1.0.0
-
-Google Cloud Storage Plugin
-
-    ID: google-cloud-storage-plugin
-    Purpose: Upload/download artifacts to Google Cloud Storage.
-    Install Command:
-
-        - google-cloud-storage-plugin:1.4
-
-Kubernetes and Container Plugins
-
-For efficient Kubernetes integration and containerized workflows:
-
-    Kubernetes CLI Plugin
-        ID: kubernetes-cli
-        Purpose: Execute kubectl commands from Jenkins.
-        Install Command:
-
-    - kubernetes-cli:1.13.0
-
-Docker Pipeline Plugin
-
-    ID: docker-workflow
-    Purpose: Enables Jenkins to build and deploy Docker containers.
-    Install Command:
-
-    - docker-workflow:1.28
-
-Kubernetes Credentials Plugin
-
-    ID: kubernetes-credentials-provider
-    Purpose: Use Kubernetes secrets as Jenkins credentials.
-    Install Command:
-
-        - kubernetes-credentials-provider:0.20
-
-Build and Deployment Plugins
-
-For automating builds and deployments:
-
-    Git Plugin
-        ID: git
-        Purpose: Interact with Git repositories.
-        Install Command:
-
-    - git:5.0.0
-
-GitHub Plugin
-
-    ID: github
-    Purpose: Integrate Jenkins with GitHub repositories.
-    Install Command:
-
-    - github:1.37.0
-
-Artifact Uploaders
-
-    S3 Plugin (s3): For AWS S3.
-    Google Cloud Storage Plugin: For GCS.
-    Install Command:
-
-        - s3:0.11.5
-
-Security and Credentials Plugins
-
-For managing secure connections and credentials:
-
-    Credentials Binding Plugin
-        ID: credentials-binding
-        Purpose: Inject credentials into jobs.
-        Install Command:
-
-    - credentials-binding:1.27
-
-Role-Based Authorization Plugin
-
-    ID: role-strategy
-    Purpose: Fine-grained role-based access control.
-    Install Command:
-
-    - role-strategy:3.3
-
-Matrix Authorization Strategy Plugin
-
-    ID: matrix-auth
-    Purpose: Define permissions for multiple users/groups.
-    Install Command:
-
-        - matrix-auth:3.1.7
-
-Monitoring and Optimization Plugins
-
-For better monitoring and resource usage:
-
-    Metrics Plugin
-        ID: metrics
-        Purpose: Collect system metrics for Jenkins.
-        Install Command:
-
-    - metrics:4.0.2
-
-Performance Plugin
-
-    ID: performance
-    Purpose: Analyze performance of builds.
-    Install Command:
-
-    - performance:3.20
-
-Monitoring Plugin
-
-    ID: monitoring
-    Purpose: Monitor Jenkins nodes and jobs.
-    Install Command:
-
-        - monitoring:1.92.0
-
-UI and Quality of Life Plugins
-
-For better user experience:
-
-    Blue Ocean Plugin
-        ID: blueocean
-        Purpose: Provides a modern pipeline visualization UI.
-        Install Command:
-
-    - blueocean:1.26.0
-
-AnsiColor Plugin
-
-    ID: ansicolor
-    Purpose: Adds color to console output for better readability.
-    Install Command:
-
-        - ansicolor:1.0.1
-
-Example values.yaml for Helm
-
-If you’re using Helm, include all these plugins in your values.yaml file:
-
-controller:
-  installPlugins:
-    - kubernetes:3978.vb_4ea_388cf528
-    - workflow-api:2.47
-    - workflow-aggregator:2.6
-    - pipeline-stage-view:2.19
-    - ssh-credentials:273.v85f8623c1c5a
-    - google-kubernetes-engine:0.9.0
-    - google-oauth-plugin:1.0.0
-    - google-cloud-storage-plugin:1.4
-    - kubernetes-cli:1.13.0
-    - docker-workflow:1.28
-    - kubernetes-credentials-provider:0.20
-    - git:5.0.0
-    - github:1.37.0
-    - credentials-binding:1.27
-    - role-strategy:3.3
-    - matrix-auth:3.1.7
-    - metrics:4.0.2
-    - performance:3.20
-    - monitoring:1.92.0
-    - blueocean:1.26.0
-    - ansicolor:1.0.1
-
-Install and Validate Plugins
-
-    Deploy Jenkins:
-
-helm upgrade --install jenkins jenkinsci/jenkins -f values.yaml -n new-jenkins3
-
-Check installed plugins:
-
-    kubectl logs jenkins-0 -n new-jenkins3
-
-    Verify in Jenkins UI under Manage Jenkins > Plugin Manager.
-
-This list ensures your Jenkins setup is fully compatible with GKE and covers CI/CD workflows, security, and Kubernetes integration. Let me know if you need help configuring or debugging!
