@@ -1,37 +1,37 @@
-mv plugins/git.jpi plugins/git.jpi.bak
-mv plugins/git-client.jpi plugins/git-client.jpi.bak
-mv plugins/github.jpi plugins/github.jpi.bak
-mv plugins/github-api.jpi plugins/github-api.jpi.bak
-mv plugins/github-branch-source.jpi plugins/github-branch-source.jpi.bak
-mv plugins/workflow-multibranch.jpi plugins/workflow-multibranch.jpi.bak
 
 
+Create a Role with Required Permissions: Use the following YAML to define a Role with permissions to list, watch, and create pods in the new-jenkins3 namespace:
 
-openssl s_client -connect 34.121.98.189:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM > kube-cert.pem
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: new-jenkins3
+  name: jenkins-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
 
+Bind the Role to the Jenkins Service Account: Create a RoleBinding to assign the role to the Jenkins service account:
 
-============================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-rolebinding
+  namespace: new-jenkins3
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: new-jenkins3
+roleRef:
+  kind: Role
+  name: jenkins-role
+  apiGroup: rbac.authorization.k8s.io
 
-gcloud compute firewall-rules create allow-jenkins-8080 \
-    --direction=INGRESS \
-    --priority=1000 \
-    --network=default \
-    --action=ALLOW \
-    --rules=tcp:8080 \
-    --source-ranges=0.0.0.0/0 \
-    --description="Allow traffic to Jenkins on port 8080"
+Apply the Configuration: Apply both the Role and RoleBinding using:
 
-
-=====================
-
-gcloud compute instances list --filter="name=jenkins-domains" --format="table[box](NAME,ZONE,EXTERNAL_IP)"
-
-=======================
-
-gcloud compute instances update jenkins-domains \
-    --zone=us-central1-c \
-    --network-interface=network-tier=PREMIUM,access-config
-
-
-============================
-
+kubectl apply -f role.yaml
+kubectl apply -f rolebinding.yaml
