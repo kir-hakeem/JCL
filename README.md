@@ -1,3 +1,7 @@
+                kubectl exec --namespace jenkins1 -it svc/jenkins1 -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password
+
+
+
 Steps to Update Jenkins Plugins
 
 Access the Jenkins Container: From your Kubernetes command, you're already inside the Jenkins container. If not, you can re-enter using:
