@@ -1,3 +1,11 @@
+      kubectl run curlpod --image=radial/busyboxplus:curl -i --tty --rm
+      curl http://10.24.5.21:8080/login
+
+                
+                
+                
+  
+                
                 kubectl exec --namespace jenkins1 -it svc/jenkins1 -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password
 
 
