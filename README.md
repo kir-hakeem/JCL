@@ -1,16 +1,20 @@
-      kubectl run curlpod --image=radial/busyboxplus:curl -i --tty --rm
-      curl http://10.24.5.21:8080/login
+Steps to Edit the StatefulSet Configuration
 
-                
-                
-                
-  
-                
-                kubectl exec --namespace jenkins1 -it svc/jenkins1 -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password
+Edit the StatefulSet YAML: Use the command to edit the configuration:
 
+            kubectl edit statefulset jenkins1 -n jenkins1
 
+Modify the JAVA_OPTS Environment Variable: Under the env section, add or modify the JAVA_OPTS variable to include the flag to disable plugin loading:
 
-Steps to Update Jenkins Plugins
+            - name: JAVA_OPTS
+              value: "-Djenkins.install.runSetupWizard=false -Djenkins.plugin.disable=true"
+
+Save the Changes: After editing, save the changes and exit the editor. This will update the StatefulSet.
+
+Restart the StatefulSet: Ensure the updated configuration is applied by restarting the StatefulSet:
+
+            kubectl rollout restart statefulset jenkins1 -n jenkins1
+
 
 Access the Jenkins Container: From your Kubernetes command, you're already inside the Jenkins container. If not, you can re-enter using:
 
