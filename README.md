@@ -1,3 +1,6 @@
+            JENKINS_OPTS: --argumentsRealm.passwd.admin=admin --argumentsRealm.roles.user=admin --argumentsRealm.roles.admin=admin -Djenkins.install.runSetupWizard=false
+
+
 Steps to Edit the StatefulSet Configuration
 
 Edit the StatefulSet YAML: Use the command to edit the configuration:
