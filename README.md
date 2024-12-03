@@ -1,3 +1,7 @@
+            kubectl -n jenkins1 exec -it pod/jenkins1-0 -- rm -f /var/jenkins_home/plugins/<problematic-plugin>.jpi
+
+
+QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ
             JENKINS_OPTS: --argumentsRealm.passwd.admin=admin --argumentsRealm.roles.user=admin --argumentsRealm.roles.admin=admin -Djenkins.install.runSetupWizard=false
 
 
