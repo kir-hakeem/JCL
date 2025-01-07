@@ -1,48 +1,62 @@
-Step 1: Create an RBAC Role and RoleBinding
+To resolve the issue in Step 2 (allowing Jenkins to access the Docker socket on Kubernetes), you need to configure the Jenkins agent Pod Template or Kubernetes Deployment to mount the Docker socket. Here's how to achieve this:
+Option 1: Update the Jenkins Kubernetes Pod Template
 
-Create a Role and RoleBinding that grants the required permissions to the new-jenkins2 service account in the ob30-cert-suite namespace.
-Role Configuration (jenkins-role.yaml):
+    Access Jenkins Kubernetes Cloud Configuration:
+        Navigate to Manage Jenkins > Manage Nodes and Clouds > Configure Clouds.
+        Click on your Kubernetes cloud configuration.
 
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: Role
-    metadata:
-      namespace: ob30-cert-suite
-      name: jenkins-role
-    rules:
-      - apiGroups: [""]
-        resources: ["pods", "pods/log", "services", "endpoints"]
-        verbs: ["get", "list", "watch"]
-      - apiGroups: ["apps"]
-        resources: ["replicasets", "deployments"]
-        verbs: ["get", "list", "watch"]
+    Update the Pod Template:
+        Find the Pod Template used for running Jenkins jobs.
+        Add a Volume and a Volume Mount to the container configuration to bind the Docker socket.
 
-RoleBinding Configuration (jenkins-rolebinding.yaml):
+    Configuration:
 
-    apiVersion: rbac.authorization.k8s.io/v1
-    kind: RoleBinding
-    metadata:
-      namespace: ob30-cert-suite
-      name: jenkins-rolebinding
-    subjects:
-      - kind: ServiceAccount
-        name: new-jenkins2
-        namespace: ob30-cert-suite
-    roleRef:
-      kind: Role
-      name: jenkins-role
-      apiGroup: rbac.authorization.k8s.io
+        Add a volume for /var/run/docker.sock:
 
-Step 2: Apply the RBAC Configurations
+volumes:
+  - name: docker-sock
+    hostPath:
+      path: /var/run/docker.sock
+      type: File
 
-Apply the above YAML configurations to your Kubernetes cluster:
+Mount the volume inside the Jenkins agent container:
 
-    kubectl apply -f jenkins-role.yaml
-    kubectl apply -f jenkins-rolebinding.yaml
+        containers:
+          - name: jnlp
+            volumeMounts:
+              - name: docker-sock
+                mountPath: /var/run/docker.sock
 
-Step 3: Verify RBAC Permissions
+    Save and Apply Changes:
+        Save the updated Kubernetes Pod Template configuration.
+        Restart the Jenkins agents (delete running agent pods to allow the system to recreate them with the new configuration).
 
-Verify that the new-jenkins2 service account can list pods:
+Option 2: Modify the Kubernetes YAML File
 
-    kubectl auth can-i list pods --as=system:serviceaccount:ob30-cert-suite:new-jenkins2 -n ob30-cert-suite
+If you’re managing Jenkins agents directly with a YAML configuration file, update the configuration to include the Docker socket.
 
-If the output is yes, the permissions are set correctly.
+Edit the Deployment or Pod YAML File: Find the YAML file managing the Jenkins agents. Add a volume and volume mount for the Docker socket.
+
+Example Updated YAML File:
+
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: jenkins-agent
+          namespace: ob30-cert-suite
+        spec:
+          containers:
+          - name: jenkins-agent
+            image: jenkins/inbound-agent:4.13-2
+            volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          volumes:
+          - name: docker-sock
+            hostPath:
+              path: /var/run/docker.sock
+              type: File
+
+Apply the YAML File: Apply the updated configuration:
+
+        kubectl apply -f jenkins-agent.yaml
