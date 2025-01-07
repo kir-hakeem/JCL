@@ -1,62 +1,87 @@
-To resolve the issue in Step 2 (allowing Jenkins to access the Docker socket on Kubernetes), you need to configure the Jenkins agent Pod Template or Kubernetes Deployment to mount the Docker socket. Here's how to achieve this:
-Option 1: Update the Jenkins Kubernetes Pod Template
-
-    Access Jenkins Kubernetes Cloud Configuration:
-        Navigate to Manage Jenkins > Manage Nodes and Clouds > Configure Clouds.
-        Click on your Kubernetes cloud configuration.
-
-    Update the Pod Template:
-        Find the Pod Template used for running Jenkins jobs.
-        Add a Volume and a Volume Mount to the container configuration to bind the Docker socket.
-
-    Configuration:
-
-        Add a volume for /var/run/docker.sock:
-
-volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
-      type: File
-
-Mount the volume inside the Jenkins agent container:
-
-        containers:
-          - name: jnlp
-            volumeMounts:
-              - name: docker-sock
-                mountPath: /var/run/docker.sock
-
-    Save and Apply Changes:
-        Save the updated Kubernetes Pod Template configuration.
-        Restart the Jenkins agents (delete running agent pods to allow the system to recreate them with the new configuration).
-
-Option 2: Modify the Kubernetes YAML File
-
-If you’re managing Jenkins agents directly with a YAML configuration file, update the configuration to include the Docker socket.
-
-Edit the Deployment or Pod YAML File: Find the YAML file managing the Jenkins agents. Add a volume and volume mount for the Docker socket.
-
-Example Updated YAML File:
-
-        apiVersion: v1
-        kind: Pod
-        metadata:
-          name: jenkins-agent
-          namespace: ob30-cert-suite
-        spec:
-          containers:
-          - name: jenkins-agent
-            image: jenkins/inbound-agent:4.13-2
-            volumeMounts:
-            - name: docker-sock
-              mountPath: /var/run/docker.sock
-          volumes:
-          - name: docker-sock
-            hostPath:
-              path: /var/run/docker.sock
-              type: File
-
-Apply the YAML File: Apply the updated configuration:
-
-        kubectl apply -f jenkins-agent.yaml
+pipeline
+    
+    pipeline {
+        agent any
+    
+        environment {
+            GKE_CLUSTER = 'your-cluster-name'          // Replace with your GKE cluster name
+            GKE_ZONE = 'your-cluster-zone'            // Replace with your cluster zone
+            GKE_PROJECT = 'your-project-id'           // Replace with your project ID
+            GKE_NAMESPACE = 'default'                // Change if using a custom namespace
+            DOCKER_IMAGE = 'gcr.io/your-project-id/your-app' // Docker image name
+        }
+    
+        stages {
+            stage('Checkout Code') {
+                steps {
+                    // Checkout code from GitHub
+                    git 'https://github.com/your-repo/your-app.git'  // Replace with your repo
+                }
+            }
+    
+            stage('Build Docker Image') {
+                steps {
+                    script {
+                        // Build Docker image
+                        sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
+                    }
+                }
+            }
+    
+            stage('Push Docker Image to GCR') {
+                steps {
+                    withCredentials([file(credentialsId: 'gcloud-service-key', variable: 'GOOGLE_CREDENTIALS')]) {
+                        script {
+                            // Authenticate with Google Cloud using a service account
+                            sh 'gcloud auth activate-service-account --key-file=$GOOGLE_CREDENTIALS'
+                            sh 'gcloud config set project $GKE_PROJECT'
+                            sh 'gcloud auth configure-docker'
+    
+                            // Push the Docker image to Google Container Registry
+                            sh "docker push $DOCKER_IMAGE:$BUILD_NUMBER"
+                        }
+                    }
+                }
+            }
+    
+            stage('Deploy to GKE') {
+                steps {
+                    withCredentials([file(credentialsId: 'gcloud-service-key', variable: 'GOOGLE_CREDENTIALS')]) {
+                        script {
+                            // Authenticate with Google Cloud and configure kubectl
+                            sh 'gcloud auth activate-service-account --key-file=$GOOGLE_CREDENTIALS'
+                            sh 'gcloud container clusters get-credentials $GKE_CLUSTER --zone $GKE_ZONE --project $GKE_PROJECT'
+    
+                            // Deploy the application to GKE
+                            sh "kubectl apply -f k8s/deployment.yaml"
+                        }
+                    }
+                }
+            }
+    
+            stage('Test Deployment') {
+                steps {
+                    script {
+                        // Perform tests, e.g., health checks
+                        sh 'kubectl rollout status deployment/your-app -n $GKE_NAMESPACE'
+                        sh 'curl -f http://your-app.your-domain.com/health'  // Replace with actual health endpoint
+                    }
+                }
+            }
+        }
+    
+        post {
+            always {
+                // Actions to always perform, e.g., clean-up
+                echo 'Pipeline execution completed.'
+            }
+            success {
+                // Actions on success
+                echo 'Build and deployment succeeded!'
+            }
+            failure {
+                // Actions on failure
+                echo 'Build or deployment failed!'
+            }
+        }
+    }
