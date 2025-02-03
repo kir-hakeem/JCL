@@ -6,6 +6,9 @@ Make sure acme.sh is installed and working correctly. If not, reinstall it using
 
 Issue a New Certificate:
 
+    _acme-challenge.onerostervalidator.imsglobal.org -> <value provided by acme.sh>
+
+
 Use acme.sh to issue a new certificate for your domain. This will automatically generate the required certificate and private key files. Run the following command:
 
     ~/.acme.sh/acme.sh --issue --dns dns_squarespace -d onerostervalidator.imsglobal.org
