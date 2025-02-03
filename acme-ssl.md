@@ -1,54 +1,45 @@
-Install acme.sh First, install acme.sh if it's not already installed:
+Ensure acme.sh is Installed Correctly:
+
+Make sure acme.sh is installed and working correctly. If not, reinstall it using the following:
 
     curl https://get.acme.sh | sh
 
+Issue a New Certificate:
 
-After the installation, restart your shell session or run:
+Use acme.sh to issue a new certificate for your domain. This will automatically generate the required certificate and private key files. Run the following command:
 
-    source ~/.bashrc
+    ~/.acme.sh/acme.sh --issue -d onerostervalidator.imsglobal.org --webroot /var/www/html
 
+Ensure /var/www/html is the correct webroot where the challenge files can be placed for validation. If you're unsure, check your web server configuration for the correct path.
 
-Issue the SSL Certificate 
+Install the New Certificate:
 
-    sudo systemctl stop httpd
-    ~/.acme.sh/acme.sh --issue --standalone -d onerostervalidator.imsglobal.org
-    sudo systemctl start httpd
-
-
-Install the SSL Certificate 
+Once the certificate is successfully issued, install it with:
 
     ~/.acme.sh/acme.sh --install-cert -d onerostervalidator.imsglobal.org \
     --key-file /etc/ssl/private/onerostervalidator.key \
     --fullchain-file /etc/ssl/certs/onerostervalidator.crt
 
+This will install the new certificate and key into the specified paths.
 
-Configure Your Server to Use the SSL Certificate 
-for Apache
+Update the Apache Configuration (if needed):
+
+Ensure the ssl.conf points to the correct files:
 
     SSLCertificateFile /etc/ssl/certs/onerostervalidator.crt
     SSLCertificateKeyFile /etc/ssl/private/onerostervalidator.key
 
-for Nginx
+Restart Apache:
 
-    ssl_certificate /etc/ssl/certs/onerostervalidator.crt;
-    ssl_certificate_key /etc/ssl/private/onerostervalidator.key;
+Restart Apache to apply the new certificate:
 
-Automate SSL Renewal 
+    sudo service httpd restart
 
-    crontab -e
+Verify the Certificate:
 
-Add the following line to renew the certificate daily:
+Finally, check if the new certificate is correctly applied by visiting your domain using HTTPS or using tools like openssl or an online SSL checker.
 
-    0 0 * * * ~/.acme.sh/acme.sh --cron --home ~/.acme.sh
+Example command:
 
-
-
-
-
-
-
-
-
-
-
+    openssl s_client -connect onerostervalidator.imsglobal.org:443
 
