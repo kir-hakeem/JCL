@@ -8,7 +8,8 @@ Issue a New Certificate:
 
 Use acme.sh to issue a new certificate for your domain. This will automatically generate the required certificate and private key files. Run the following command:
 
-    ~/.acme.sh/acme.sh --issue -d onerostervalidator.imsglobal.org --webroot /var/www/html
+    ~/.acme.sh/acme.sh --issue --dns dns_squarespace -d onerostervalidator.imsglobal.org
+
 
 Ensure /var/www/html is the correct webroot where the challenge files can be placed for validation. If you're unsure, check your web server configuration for the correct path.
 
