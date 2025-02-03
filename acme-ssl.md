@@ -21,3 +21,5 @@ Copy
     reboot
 
 Verify the Upgrade:
+
+    rpm -Uvh https://vault.centos.org/7.9.2009/os/x86_64/Packages/centos-release-7-9.2009.1.el7.centos.x86_64.rpm
