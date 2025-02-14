@@ -1,3 +1,7 @@
+kubectl apply -f https://storage.googleapis.com/cloudsql-proxy-k8s/cloud-sql-proxy.yaml
+
+            
+            
             kubectl -n jenkins1 exec -it pod/jenkins1-0 -- rm -f /var/jenkins_home/plugins/<problematic-plugin>.jpi
 
 
