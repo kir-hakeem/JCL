@@ -15,11 +15,17 @@
     
     serviceAccount:
       name: ob30-sa
-      gcpServiceAccount: secrets-init@digitalocean-422117.jam.gserviceaccount.com
+      gcpServiceAccount: secrets-init@digitalocean-422117.iam.gserviceaccount.com
     
     secretManager:
       projectId: "581155432306"
       usernameSecret: "verifiable-credentials-ob-username"
+    
+    service:
+      name: ob30-cert-suite-service
+      port: 80
+      targetPort: 8080
+
 
 3️⃣ templates/namespace.yaml
     
@@ -53,57 +59,76 @@
             fileName: "db-username"
 
 6️⃣ templates/deployment.yaml
-    
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: ob30-cert-suite-deployment
-      namespace: ob30-cert-suite
-    spec:
-      replicas: 1
-      selector:
-        matchLabels:
-          app: ob30-cert-suite
-      template:
+
+        apiVersion: apps/v1
+        kind: Deployment
         metadata:
-          labels:
-            app: ob30-cert-suite
+          name: ob30-cert-suite-deployment
+          namespace: ob30-cert-suite
         spec:
-          serviceAccountName: {{ .Values.serviceAccount.name }}
-          containers:
-            - name: ob30-app
-              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-              imagePullPolicy: {{ .Values.image.pullPolicy }}
-              volumeMounts:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ob30-cert-suite
+          template:
+            metadata:
+              labels:
+                app: ob30-cert-suite
+            spec:
+              serviceAccountName: {{ .Values.serviceAccount.name }}
+              containers:
+                - name: ob30-app
+                  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+                  imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  ports:
+                    - containerPort: {{ .Values.service.targetPort }}
+                  volumeMounts:
+                    - name: secrets-store
+                      mountPath: "/mnt/secrets-store"
+                      readOnly: true
+                  env:
+                    - name: DB_USERNAME
+                      valueFrom:
+                        secretKeyRef:
+                          name: gcp-secrets
+                          key: db-username
+              volumes:
                 - name: secrets-store
-                  mountPath: "/mnt/secrets-store"
-                  readOnly: true
-              env:
-                - name: DB_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: gcp-secrets
-                      key: db-username
-          volumes:
-            - name: secrets-store
-              csi:
-                driver: secrets-store.csi.k8s.io
-                readOnly: true
-                volumeAttributes:
-                  secretProviderClass: gcp-secrets
+                  csi:
+                    driver: secrets-store.csi.k8s.io
+                    readOnly: true
+                    volumeAttributes:
+                      secretProviderClass: gcp-secrets
 
 7️⃣ templates/service.yaml
     
     apiVersion: v1
     kind: Service
     metadata:
-      name: ob30-cert-suite-service
+      name: {{ .Values.service.name }}
       namespace: ob30-cert-suite
     spec:
       selector:
         app: ob30-cert-suite
       ports:
         - protocol: TCP
-          port: 80
-          targetPort: 8080
+          port: {{ .Values.service.port }}
+          targetPort: {{ .Values.service.targetPort }}
 
+
+8️⃣ templates/tests/test-connection.yaml (Fixed Error)
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: test-connection
+      namespace: ob30-cert-suite
+      labels:
+        app: ob30-cert-suite
+    spec:
+      containers:
+        - name: curl
+          image: curlimages/curl:latest
+          command: ["curl", "-v", "{{ .Values.service.name }}:{{ .Values.service.port }}"]
+      restartPolicy: Never
+    
