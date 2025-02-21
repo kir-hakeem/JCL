@@ -142,4 +142,38 @@
           image: curlimages/curl:latest
           command: ["curl", "-v", "{{ .Values.service.name }}:{{ .Values.service.port }}"]
       restartPolicy: Never
+
+
+templates/ingress.yaml
     
+    {{- if .Values.ingress.enabled }}
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: ob30-cert-suite-ingress
+      namespace: ob30-cert-suite
+      annotations:
+        kubernetes.io/ingress.class: {{ .Values.ingress.className }}
+    spec:
+      rules:
+        {{- range .Values.ingress.hosts }}
+        - host: {{ .host }}
+          http:
+            paths:
+              {{- range .paths }}
+              - path: {{ .path }}
+                pathType: {{ .pathType }}
+                backend:
+                  service:
+                    name: {{ $.Values.service.name }}
+                    port:
+                      number: {{ $.Values.service.port }}
+              {{- end }}
+        {{- end }}
+      {{- if .Values.ingress.tls }}
+      tls:
+        {{- toYaml .Values.ingress.tls | nindent 4 }}
+      {{- end }}
+    {{- end }}
+    
+
