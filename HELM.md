@@ -35,6 +35,11 @@
             - path: /
               pathType: Prefix
       tls: []
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
 
 
 
