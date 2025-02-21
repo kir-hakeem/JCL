@@ -26,6 +26,17 @@
       port: 80
       targetPort: 8080
 
+    ingress:
+      enabled: true
+      className: "nginx"
+      hosts:
+        - host: ob30.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+
 
 3️⃣ templates/namespace.yaml
     
