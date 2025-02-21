@@ -1,3 +1,9 @@
+COMMAND
+
+    kubectl get namespace ob30-cert-suite -o json | jq '.spec.finalizers = []' | \
+    kubectl replace --raw "/api/v1/namespaces/ob30-cert-suite/finalize" -f -
+
+
 📝 Files Content
 1️⃣ Chart.yaml
 
