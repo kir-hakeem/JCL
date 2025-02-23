@@ -1,3 +1,31 @@
+✅ Step 1: Install the Secret Store CSI Driver
+
+Run the following command to install the driver via Helm:
+
+    helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
+    helm repo update
+    
+    helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver \
+      --namespace kube-system \
+      --set syncSecret.enabled=true \
+      --set enableSecretRotation=true
+
+🔎 Verify installation:
+
+    kubectl get pods -n kube-system | grep csi
+
+Look for pods like secrets-store-csi-driver-* running successfully.
+✅ Step 2: Install GCP Secret Manager Provider
+
+    kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/secrets-store-csi-driver-provider-gcp/main/deploy/provider-gcp-plugin.yaml
+
+🔎 Verify provider installation:
+
+    kubectl get pods -n kube-system | grep provider-gcp
+
+
+
+
 ✅ Solution Steps
     
     helm upgrade --install ob30-cert-suite ./ob30-cert-suite -n ob30-cert-suite --values values.yaml
