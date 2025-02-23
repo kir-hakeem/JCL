@@ -1,4 +1,9 @@
 ✅ Solution Steps
+    
+    helm template ob30-cert-suite ./ob30-cert-suite -n ob30-cert-suite --values values.yaml > rendered-deployment.yaml
+    kubectl apply -f rendered-deployment.yaml -n ob30-cert-suite
+
+
 Step 1: Verify Secret in Secret Manager
 
 Make sure the secret exists and is accessible:
