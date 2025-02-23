@@ -1,7 +1,7 @@
 ✅ Solution Steps
     
-    helm template ob30-cert-suite ./ob30-cert-suite -n ob30-cert-suite --values values.yaml > rendered-deployment.yaml
-    kubectl apply -f rendered-deployment.yaml -n ob30-cert-suite
+    helm upgrade --install ob30-cert-suite ./ob30-cert-suite -n ob30-cert-suite --values values.yaml
+
 
 
 Step 1: Verify Secret in Secret Manager
