@@ -1,3 +1,68 @@
+✅ Solution Steps
+Step 1: Verify Secret in Secret Manager
+
+Make sure the secret exists and is accessible:
+
+    gcloud secrets describe verifiable-credentials-db-username --project=581155432306
+
+🔔 Ensure your service account (secrets-init@digitalocean-422117.iam.gserviceaccount.com) has the Secret Manager Secret Accessor role:
+    
+    gcloud projects add-iam-policy-binding 581155432306 \
+      --member="serviceAccount:secrets-init@digitalocean-422117.iam.gserviceaccount.com" \
+      --role="roles/secretmanager.secretAccessor"
+
+Step 2: Update the SecretProviderClass Configuration
+
+Check if your SecretProviderClass is correctly referencing the secret:
+    
+    apiVersion: secrets-store.csi.x-k8s.io/v1
+    kind: SecretProviderClass
+    metadata:
+      name: gcp-secrets
+      namespace: ob30-cert-suite
+    spec:
+      provider: gcp
+      parameters:
+        secrets: |
+          - resourceName: "projects/581155432306/secrets/verifiable-credentials-db-username/versions/latest"
+            path: "db-username"
+
+✅ Apply the changes:
+
+    kubectl apply -f secretproviderclass.yaml -n ob30-cert-suite
+
+Step 3: Update Deployment with Correct Volume Mount
+
+Make sure your deployment references the SecretProviderClass:
+    
+    volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "gcp-secrets"
+    
+    containers:
+      - name: ob30-app
+        image: openjdk:17-jdk-slim
+        volumeMounts:
+          - name: secrets-store
+            mountPath: "/mnt/secrets-store"
+        env:
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: verifiable-credentials-db-username
+                key: db-username
+
+Apply the deployment:
+
+    kubectl apply -f deployment.yaml -n ob30-cert-suite
+    kubectl rollout restart deployment ob30-cert-suite-deployment -n ob30-cert-suite
+
+
+
 COMMAND
 
     kubectl get namespace ob30-cert-suite -o json | jq '.spec.finalizers = []' | \
