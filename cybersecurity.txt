@@ -1,0 +1,12 @@
+sudo apt update
+sudo apt install -y build-essential zlib1g-dev libssl-dev libpam0g-dev
+
+cd /usr/local/src
+sudo wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-9.8p1.tar.gz
+sudo tar -xvzf openssh-9.8p1.tar.gz
+cd openssh-9.8p1
+sudo ./configure --prefix=/usr --sysconfdir=/etc/ssh
+sudo make -j$(nproc)
+sudo make install
+
+sudo systemctl restart sshd
