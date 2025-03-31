@@ -9,3 +9,8 @@
     ssl-cert=/etc/mysql-ssl/server-cert.pem
     ssl-key=/etc/mysql-ssl/server-key.pem
     require_secure_transport=ON  # This enforces SSL for all connections
+
+
+CHECK
+
+    mysql -u root -p -e "SHOW VARIABLES LIKE '%ssl%';"
