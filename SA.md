@@ -11,7 +11,7 @@ sudo nano /etc/apache2/sites-enabled/moodle.conf
 Replace the entire file with:
 ```apache
 <VirtualHost *:80>
-    ServerName prod.ledtech.org
+    ServerName prod.1edtech.org
     DocumentRoot /var/www/moodle-1click
     
     # Force HTTPS redirect (corrected syntax)
