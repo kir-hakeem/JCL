@@ -1,3 +1,4 @@
+v=spf1 a ip4:198.2.128.0/18 ip4:148.105.0.0/16 ip4:205.201.128.0/20 include:cvent-planner.com include:_spf.google.com include:sendgrid.net include:amazonses.com include:spf.protection.outlook.com ~all
 
 
 ### **1. Generate a TLS Certificate for `app.1edtech.org`**
