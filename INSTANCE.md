@@ -1,67 +1,24 @@
-#### **1. Check if SSH key was added correctly**
-
-    gcloud compute firewall-rules create allow-ssh-from-iap \
-      --allow=tcp:22 \
-      --source-ranges=35.235.240.0/20 \
-      --target-tags=ssh-enabled \
-      --description="Allow SSH from Cloud IAP"
-
-
-Run this to view SSH metadata:
+#### Step 1: Add the PPA manually
 
 ```bash
-gcloud compute instances describe sandbox-1edtech-new --zone=us-central1-a --format="get(metadata.items)"
+sudo apt install -y software-properties-common ca-certificates lsb-release apt-transport-https
+sudo mkdir -p /etc/apt/keyrings
+sudo wget -qO /etc/apt/keyrings/ondrej-php.gpg https://packages.sury.org/php/apt.gpg
+echo "deb [signed-by=/etc/apt/keyrings/ondrej-php.gpg] https://packages.sury.org/php $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
 ```
 
-If no SSH key is set or your key is missing, re-add it:
+#### Step 2: Update and install PHP 8.2
 
 ```bash
-gcloud compute ssh sandbox-1edtech-new --zone=us-central1-a --project=moodle-415914 --ssh-key-expire-after=1d
+sudo apt update
+sudo apt install php8.2 php8.2-cli php8.2-common php8.2-fpm php8.2-mysql php8.2-xml php8.2-curl php8.2-zip php8.2-mbstring php8.2-gd
 ```
 
----
-
-#### **2. Confirm SSH is installed in image**
-
-If the boot disk is from snapshot, and it’s corrupted or missing SSH service, you won’t get in.
-
-Attach a startup script to fix:
+#### Step 3: Enable PHP 8.2 for Apache
 
 ```bash
-gcloud compute instances add-metadata sandbox-1edtech-new \
-  --zone=us-central1-a \
-  --metadata=startup-script='#! /bin/bash
-    sudo apt update
-    sudo apt install -y openssh-server
-    sudo systemctl enable ssh
-    sudo systemctl restart ssh'
-```
-
----
-
-#### **3. Try connecting from IAP Tunnel (if public IP fails)**
-
-```bash
-gcloud compute ssh sandbox-1edtech-new \
-  --zone=us-central1-a \
-  --tunnel-through-iap
-```
-
----
-
-#### **4. If still blocked, try serial console access**
-
-Enable it to debug:
-
-```bash
-gcloud compute instances add-metadata sandbox-1edtech-new \
-  --zone=us-central1-a \
-  --metadata=serial-port-enable=1
-```
-
-Then connect:
-
-```bash
-gcloud compute connect-to-serial-port sandbox-1edtech-new --zone=us-central1-a
+sudo a2dismod php8.1
+sudo a2enmod php8.2
+sudo systemctl restart apache2
 ```
 
