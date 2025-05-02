@@ -3,13 +3,13 @@
 Run this to view SSH metadata:
 
 ```bash
-gcloud compute instances describe sandbox-ledtech-new --zone=us-central1-a --format="get(metadata.items)"
+gcloud compute instances describe sandbox-1edtech-new --zone=us-central1-a --format="get(metadata.items)"
 ```
 
 If no SSH key is set or your key is missing, re-add it:
 
 ```bash
-gcloud compute ssh sandbox-ledtech-new --zone=us-central1-a --project=moodle-415914 --ssh-key-expire-after=1d
+gcloud compute ssh sandbox-1edtech-new --zone=us-central1-a --project=moodle-415914 --ssh-key-expire-after=1d
 ```
 
 ---
@@ -21,7 +21,7 @@ If the boot disk is from snapshot, and it’s corrupted or missing SSH service, 
 Attach a startup script to fix:
 
 ```bash
-gcloud compute instances add-metadata sandbox-ledtech-new \
+gcloud compute instances add-metadata sandbox-1edtech-new \
   --zone=us-central1-a \
   --metadata=startup-script='#! /bin/bash
     sudo apt update
@@ -35,7 +35,7 @@ gcloud compute instances add-metadata sandbox-ledtech-new \
 #### **3. Try connecting from IAP Tunnel (if public IP fails)**
 
 ```bash
-gcloud compute ssh sandbox-ledtech-new \
+gcloud compute ssh sandbox-1edtech-new \
   --zone=us-central1-a \
   --tunnel-through-iap
 ```
@@ -47,7 +47,7 @@ gcloud compute ssh sandbox-ledtech-new \
 Enable it to debug:
 
 ```bash
-gcloud compute instances add-metadata sandbox-ledtech-new \
+gcloud compute instances add-metadata sandbox-1edtech-new \
   --zone=us-central1-a \
   --metadata=serial-port-enable=1
 ```
@@ -55,6 +55,6 @@ gcloud compute instances add-metadata sandbox-ledtech-new \
 Then connect:
 
 ```bash
-gcloud compute connect-to-serial-port sandbox-ledtech-new --zone=us-central1-a
+gcloud compute connect-to-serial-port sandbox-1edtech-new --zone=us-central1-a
 ```
 
