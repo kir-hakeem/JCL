@@ -1,5 +1,12 @@
 #### **1. Check if SSH key was added correctly**
 
+    gcloud compute firewall-rules create allow-ssh-from-iap \
+      --allow=tcp:22 \
+      --source-ranges=35.235.240.0/20 \
+      --target-tags=ssh-enabled \
+      --description="Allow SSH from Cloud IAP"
+
+
 Run this to view SSH metadata:
 
 ```bash
