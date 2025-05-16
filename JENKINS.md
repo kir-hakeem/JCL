@@ -24,44 +24,25 @@ TEST
 PHP SCRIPT FOR MONITORING 
     
     <?php
-    header('Content-Type: application/json');
-    
-    // CPU load average (1, 5, 15 min)
-    $load = sys_getloadavg();
-    
-    // Memory usage
-    $memInfo = file_get_contents("/proc/meminfo");
-    preg_match("/MemTotal:\s+(\d+)/", $memInfo, $memTotal);
-    preg_match("/MemAvailable:\s+(\d+)/", $memInfo, $memAvailable);
-    
-    // Disk usage
-    $diskTotal = disk_total_space("/");
-    $diskFree  = disk_free_space("/");
+    echo "<h1>Server Health Monitor</h1>";
+    echo "<pre>";
+    echo "Hostname: " . gethostname() . "\n";
     
     // Uptime
-    $uptime = shell_exec("uptime -p");
+    echo "Uptime:\n";
+    system("uptime");
     
-    // Network stats (eth0 example)
-    $rx = trim(shell_exec("cat /sys/class/net/eth0/statistics/rx_bytes"));
-    $tx = trim(shell_exec("cat /sys/class/net/eth0/statistics/tx_bytes"));
+    // CPU Load
+    echo "\nCPU Load:\n";
+    system("top -bn1 | grep 'load average'");
     
-    echo json_encode([
-        'cpu' => [
-            'load_1_min' => $load[0],
-            'load_5_min' => $load[1],
-            'load_15_min' => $load[2],
-        ],
-        'memory' => [
-            'total_kb' => $memTotal[1],
-            'available_kb' => $memAvailable[1],
-        ],
-        'disk' => [
-            'total_bytes' => $diskTotal,
-            'free_bytes' => $diskFree,
-        ],
-        'uptime' => trim($uptime),
-        'network' => [
-            'rx_bytes' => $rx,
-            'tx_bytes' => $tx,
-        ],
-    ]);
+    // Memory Usage
+    echo "\nMemory Usage:\n";
+    system("free -h");
+    
+    // Disk Usage
+    echo "\nDisk Usage:\n";
+    system("df -h /");
+    
+    echo "</pre>";
+    ?>
