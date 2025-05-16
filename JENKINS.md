@@ -1,3 +1,10 @@
+ENV
+
+    [Service]
+    Environment="GOOGLE_APPLICATION_CREDENTIALS=/root/monitoring/google-sa-json.json"
+    Environment="GOOGLE_CLOUD_PROJECT=digitalocean-422117"
+
+    
     metrics:
       receivers:
         hostmetrics:
