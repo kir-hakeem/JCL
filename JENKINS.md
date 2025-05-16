@@ -14,3 +14,9 @@
         location: "custom"
         namespace: "external"
         node_id: "ansible.1edtech.org"
+
+TEST
+
+    export GOOGLE_APPLICATION_CREDENTIALS=/root/monitoring/google-sa-json.json
+    gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    gcloud projects describe digitalocean-422117
