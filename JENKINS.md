@@ -1,25 +1,16 @@
-    receivers:
-      hostmetrics:
-        collection_interval: 60s
-        scrapers:
-          cpu:
-          memory:
-          disk:
-          load:
-          filesystem:
-          network:
+    metrics:
+      receivers:
+        hostmetrics:
+          type: hostmetrics
+      service:
+        pipelines:
+          default_pipeline:
+            receivers: [hostmetrics]
     
-    exporters:
-      googlecloud:
-        project: digitalocean-422117
-        user_agent: external-opentelemetry
-    
-    processors:
-      batch:
-    
-    service:
-      pipelines:
-        metrics:
-          receivers: [hostmetrics]
-          processors: [batch]
-          exporters: [googlecloud]
+    resource:
+      type: generic_node
+      labels:
+        project_id: "digitalocean-422117"
+        location: "custom"
+        namespace: "external"
+        node_id: "ansible.1edtech.org"
