@@ -6,21 +6,35 @@ ENV
 
     
 CONFIG
+        
+    logging:
+      receivers:
+        syslog:
+          type: files
+          include_paths:
+          - /var/log/messages
+          - /var/log/syslog
     
-    receivers:
-      hostmetrics:
-        type: hostmetrics
+    metrics:
+      receivers:
+        hostmetrics:
+          type: hostmetrics
+          collection_interval: 60s
+    
     service:
       pipelines:
-        default_pipeline:
+        metrics:
           receivers: [hostmetrics]
+        logs:
+          receivers: [syslog]
+    
     resource:
       type: generic_node
       labels:
         project_id: "digitalocean-422137"
-        location: "cuican"
+        location: "us-central1"
         namespace: "external"
-        node_id: "ansible.ledtech.org"
+        node_id: "ansible.1edtech.org"
 
 TEST
 
