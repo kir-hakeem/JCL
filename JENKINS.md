@@ -5,22 +5,22 @@ ENV
     Environment="GOOGLE_CLOUD_PROJECT=digitalocean-422117"
 
     
-    metrics:
-      receivers:
-        hostmetrics:
-          type: hostmetrics
-      service:
-        pipelines:
-          default_pipeline:
-            receivers: [hostmetrics]
+CONFIG
     
+    receivers:
+      hostmetrics:
+        type: hostmetrics
+    service:
+      pipelines:
+        default_pipeline:
+          receivers: [hostmetrics]
     resource:
       type: generic_node
       labels:
-        project_id: "digitalocean-422117"
-        location: "custom"
+        project_id: "digitalocean-422137"
+        location: "cuican"
         namespace: "external"
-        node_id: "ansible.1edtech.org"
+        node_id: "ansible.ledtech.org"
 
 TEST
 
