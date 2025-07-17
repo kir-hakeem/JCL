@@ -19,3 +19,16 @@ Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains
 
 ---
 
+## For Ingress in GKE
+
+```bash
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "X-Frame-Options: SAMEORIGIN";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-XSS-Protection: 1; mode=block";
+      more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";
+      more_set_headers "Content-Security-Policy: default-src 'self'; frame-ancestors 'self';";
+      more_set_headers "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload";
+```
+
+---
