@@ -48,14 +48,15 @@ resource "kubernetes_namespace" "example_app" {
 ```hcl
 resource "kubernetes_namespace" "flux" {
   metadata {
-    name = "flux-system"
+    name = var.namespace
   }
+}
 }
 
 resource "kubernetes_secret" "flux_gitlab_auth" {
   metadata {
-    name      = "flux-system"
-    namespace = "flux-system"
+    name      = var.namespace
+    namespace = var.namespace
   }
   data = {
     username = var.gitlab_user
