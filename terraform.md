@@ -170,4 +170,27 @@ gitlab_user          = "gitlab-user"
 gitlab_token         = "my-token"
 ```
 
-Let me know if you want to break this into physical files or apply changes directly in your repo.
+### manifests.tf — Refactored with Improvements
+
+```hcl
+locals {
+  manifests = {
+    backend_ui    = "./files/backend-config-ui.yaml.tpl"
+    backend_api   = "./files/backend-config-api.yaml.tpl"
+    mps_api       = "./files/backend-config-mps-api.yaml.tpl"
+    ssl_cert      = "./files/airworthiness-ssl-cert.yaml.tpl"
+    ingress       = "./files/http-ingress.yaml.tpl"
+    frontend_conf = "./files/frontend-config.yaml.tpl"
+  }
+}
+
+resource "kubernetes_manifest" "generated" {
+  for_each = local.manifests
+
+  manifest = yamldecode(templatefile(each.value, {
+    NAMESPACE  = var.namespace,
+    DOMAIN     = var.domain,
+    ADDR_NAME  = var.address_name
+  }))
+}
+```
