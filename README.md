@@ -1,3 +1,36 @@
+index.html
+            
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Test Page</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        margin-top: 100px;
+                        background-color: #f9f9f9;
+                    }
+                    h1 {
+                        color: #333;
+                    }
+                    p {
+                        color: #555;
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>✅ Test Page is Working</h1>
+                <p>If you see this page, your domain and server are configured correctly.</p>
+            </body>
+            </html>
+
+
+
+
+
 Option A: Fix YUM repositories (temporary solution)
 
 
