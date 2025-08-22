@@ -1,3 +1,24 @@
+2) Create a proper ssh.service for your custom build
+
+            sudo tee /etc/systemd/system/ssh.service >/dev/null <<'EOF'
+            [Unit]
+            Description=OpenSSH 10.0p2 Secure Shell server
+            After=network.target auditd.service
+            
+            [Service]
+            ExecStart=/usr/local/sbin/sshd -D
+            ExecReload=/bin/kill -HUP $MAINPID
+            KillMode=process
+            Restart=on-failure
+            RestartPreventExitStatus=255
+            Type=notify
+            
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+
+
 index.html
             
             <!DOCTYPE html>
